@@ -1,4 +1,6 @@
-﻿namespace Flight_Reservations;
+﻿﻿using System;
+
+namespace Flight_Reservations;
 
 public class Commercial_Aircraft:Aircraft
 {

@@ -2,6 +2,7 @@ using Microsoft.Data.Sqlite;
 using Flight_Reservations;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Flight_Reservations.Data
 {
@@ -19,10 +20,44 @@ namespace Flight_Reservations.Data
         }
 
         public DatabaseManager(ILogger logger = null) : this(
-            "Data Source=../../../Data/Databases/flights.db",
+            GetDefaultConnectionString(),
             new ConsoleWrapper(),
             logger)
         {
+        }
+
+        private static string GetDefaultConnectionString()
+        {
+            // Get the directory where the application is running
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            
+            // Navigate to the project root (during development, bin folder is nested)
+            string projectRoot = baseDir;
+            while (!string.IsNullOrEmpty(projectRoot) && !File.Exists(Path.Combine(projectRoot, "Flight_Reservations.csproj")))
+            {
+                projectRoot = Directory.GetParent(projectRoot)?.FullName;
+            }
+            
+            // If we can't find the project root, use current directory
+            if (string.IsNullOrEmpty(projectRoot))
+            {
+                projectRoot = Directory.GetCurrentDirectory();
+            }
+            
+            // Create OS-agnostic path to database
+            string dataDir = Path.Combine(projectRoot, "Data", "Databases");
+            string dbPath = Path.Combine(dataDir, "flights.db");
+            
+            // Ensure the directory exists
+            if (!Directory.Exists(dataDir))
+            {
+                Directory.CreateDirectory(dataDir);
+                Console.WriteLine($"Created database directory: {dataDir}");
+            }
+            
+            Console.WriteLine($"Database path: {dbPath}");
+            
+            return $"Data Source={dbPath}";
         }
 
         public void InitializeDatabase()
@@ -587,7 +622,7 @@ namespace Flight_Reservations.Data
                 {
                     var flight = new Flight
                     {
-                        FlightNumber = reader.GetDecimal(0),
+                        FlightNumber = reader.GetString(0),
                         DepartureAirportId = reader.GetString(1),
                         ArrivalAirportId = reader.GetString(2),
                         DepartureTime = DateTime.Parse(reader.GetString(3)),
@@ -636,7 +671,7 @@ namespace Flight_Reservations.Data
                 {
                     var flight = new Flight
                     {
-                        FlightNumber = reader.GetDecimal(0),
+                        FlightNumber = reader.GetString(0),
                         DepartureAirportId = reader.GetString(1),
                         ArrivalAirportId = reader.GetString(2),
                         DepartureTime = DateTime.Parse(reader.GetString(3)),
@@ -662,7 +697,7 @@ namespace Flight_Reservations.Data
             return list;
         }
 
-        public bool UpdateFlightAvailableSeats(decimal flightNumber, int newAvailableSeats)
+        public bool UpdateFlightAvailableSeats(string flightNumber, int newAvailableSeats)
         {
             try
             {
@@ -682,7 +717,7 @@ namespace Flight_Reservations.Data
             }
         }
 
-        public bool DeleteFlight(decimal flightNumber)
+        public bool DeleteFlight(string flightNumber)
         {
             return DeleteRecord("Flights", "FlightNumber", flightNumber);
         }
@@ -815,7 +850,7 @@ namespace Flight_Reservations.Data
             return DeleteRecord("Passengers", "PassengerId", id);
         }
 
-        public void AddBooking(decimal flightNumber, int passengerId, string seatNumber, string ticketClass, decimal finalPrice)
+        public void AddBooking(string flightNumber, int passengerId, string seatNumber, string ticketClass, decimal finalPrice)
         {
             try
             {
@@ -882,7 +917,7 @@ namespace Flight_Reservations.Data
                 _console.WriteLine("\n--- ALL BOOKINGS ---");
                 while (reader.Read())
                 {
-                    _console.WriteLine($"[{reader.GetInt32(0)}] Flight {reader.GetDecimal(1)} | {reader.GetString(2)} | Seat {reader.GetString(3)} | {reader.GetString(4)} | {reader.GetDecimal(5)} EUR | {DateTime.Parse(reader.GetString(6)):dd/MM/yyyy HH:mm}");
+                    _console.WriteLine($"[{reader.GetInt32(0)}] Flight {reader.GetString(1)} | {reader.GetString(2)} | Seat {reader.GetString(3)} | {reader.GetString(4)} | {reader.GetDecimal(5)} EUR | {DateTime.Parse(reader.GetString(6)):dd/MM/yyyy HH:mm}");
                 }
             }
             catch (Exception ex)
@@ -892,7 +927,7 @@ namespace Flight_Reservations.Data
         }
 
 
-        public void AddFlightCrew(decimal flightNumber, List<int> staffIds)
+        public void AddFlightCrew(string flightNumber, List<int> staffIds)
         {
             try
             {
