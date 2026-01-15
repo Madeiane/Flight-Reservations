@@ -123,7 +123,6 @@ namespace Flight_Reservations.Data
                 cmd.ExecuteNonQuery();
 
 
-                // Check and migrate missing AvailableSeats column if necessary
                 using (var checkCmd = connection.CreateCommand())
                 {
                     checkCmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('Flights') WHERE name='AvailableSeats'";
@@ -138,7 +137,6 @@ namespace Flight_Reservations.Data
                             alterCmd.ExecuteNonQuery();
                         }
 
-                        // Initialize AvailableSeats to TotalSeats for existing records
                         using (var updateCmd = connection.CreateCommand())
                         {
                             updateCmd.CommandText = "UPDATE Flights SET AvailableSeats = TotalSeats";
@@ -148,7 +146,6 @@ namespace Flight_Reservations.Data
                     }
                 }
 
-                // Check and migrate missing Type column if necessary
                 using (var checkTypeCmd = connection.CreateCommand())
                 {
                     checkTypeCmd.CommandText = "SELECT COUNT(*) FROM pragma_table_info('Flights') WHERE name='Type'";
@@ -159,7 +156,6 @@ namespace Flight_Reservations.Data
                         _console.WriteWarning("Detected missing column 'Type'. Performing migration...");
                         using (var alterTypeCmd = connection.CreateCommand())
                         {
-                            // Defaulting to 0 (Commercial)
                             alterTypeCmd.CommandText = "ALTER TABLE Flights ADD COLUMN Type INTEGER NOT NULL DEFAULT 0";
                             alterTypeCmd.ExecuteNonQuery();
                         }
@@ -179,9 +175,6 @@ namespace Flight_Reservations.Data
             }
         }
 
-        // ==========================================
-        // LOCATION OPERATIONS
-        // ==========================================
 
         public int AddCity(City city)
         {
@@ -326,7 +319,6 @@ namespace Flight_Reservations.Data
                 using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
                 var cmd = connection.CreateCommand();
-                // Joining to get detailed info if needed, but simple list for now
                 cmd.CommandText = "SELECT g.GateId, g.Name, g.AirportId, a.Code FROM Gates g JOIN Airports a ON g.AirportId = a.AirportId ORDER BY a.Code, g.Name";
                 using var reader = cmd.ExecuteReader();
                 while (reader.Read())
@@ -360,7 +352,6 @@ namespace Flight_Reservations.Data
 
         public bool DeleteCity(int id)
         {
-            // Manual Cascade: Delete Airports first
             var airports = GetAirportsByCityId(id);
             foreach (var airport in airports)
             {
@@ -371,7 +362,6 @@ namespace Flight_Reservations.Data
 
         public bool DeleteAirport(int id)
         {
-            // Manual Cascade: Delete Gates first
             try
             {
                 using var connection = new SqliteConnection(_connectionString);
@@ -401,7 +391,6 @@ namespace Flight_Reservations.Data
                 using var connection = new SqliteConnection(_connectionString);
                 connection.Open();
 
-                // Allow recursive Foreign keys if enabled, but we are doing manual mostly
                 var pragma = connection.CreateCommand();
                 pragma.CommandText = "PRAGMA foreign_keys = ON;";
                 pragma.ExecuteNonQuery();
@@ -549,9 +538,6 @@ namespace Flight_Reservations.Data
             return airports;
         }
 
-        // ==========================================
-        // FLIGHT OPERATIONS
-        // ==========================================
 
         public bool AddFlight(Flight flight, int? pilotId = null, int? copilotId = null)
         {
@@ -571,7 +557,7 @@ namespace Flight_Reservations.Data
                 cmd.Parameters.AddWithValue("@time", flight.DepartureTime.ToString("o"));
                 cmd.Parameters.AddWithValue("@price", flight.BasePrice);
                 cmd.Parameters.AddWithValue("@seats", flight.TotalSeats);
-                cmd.Parameters.AddWithValue("@available", flight.TotalSeats); // Inițial toate disponibile
+                cmd.Parameters.AddWithValue("@available", flight.TotalSeats);
                 cmd.Parameters.AddWithValue("@pilot", pilotId.HasValue ? pilotId.Value : (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@copilot", copilotId.HasValue ? copilotId.Value : (object)DBNull.Value);
                 cmd.Parameters.AddWithValue("@type", (int)flight.Type);
@@ -610,11 +596,9 @@ namespace Flight_Reservations.Data
                         Type = (FlightType)reader.GetInt32(7)
                     };
 
-                    // Setăm locurile disponibile din DB
                     int availableSeats = reader.GetInt32(6);
                     int bookedSeats = flight.TotalSeats - availableSeats;
 
-                    // Simulăm biletele rezervate pentru a sincroniza starea
                     for (int i = 0; i < bookedSeats; i++)
                     {
                         flight.BookedTickets.Add(new EconomyTicket());
@@ -703,9 +687,6 @@ namespace Flight_Reservations.Data
             return DeleteRecord("Flights", "FlightNumber", flightNumber);
         }
 
-        // ==========================================
-        // STAFF OPERATIONS
-        // ==========================================
 
         public int AddStaff(string name, int age, string role, int flightHours = 0, bool hasAdvancedCert = false, string languages = "")
         {
@@ -789,9 +770,6 @@ namespace Flight_Reservations.Data
             return DeleteRecord("Staff", "StaffId", id);
         }
 
-        // ==========================================
-        // PASSENGER & BOOKING OPERATIONS
-        // ==========================================
 
         public int AddPassenger(string name, string passportNumber = null)
         {
@@ -820,7 +798,6 @@ namespace Flight_Reservations.Data
 
         public bool DeletePassenger(int id)
         {
-            // Manual Cascade: Delete Bookings first
             try
             {
                 using var connection = new SqliteConnection(_connectionString);
@@ -949,4 +926,5 @@ namespace Flight_Reservations.Data
             }
         }
     }
+
 }
