@@ -1,9 +1,9 @@
-namespace Flight_Reservations
+﻿namespace Flight_Reservations
 {
     public interface IConsoleWrapper
     {
+        void Write(string message);
         void WriteLine(string message);
-        
         void WriteError(string message);
         
         void WriteSuccess(string message);

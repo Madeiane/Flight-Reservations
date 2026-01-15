@@ -1,4 +1,4 @@
-namespace Flight_Reservations
+﻿namespace Flight_Reservations
 {
     public class Gate : Location
     {
