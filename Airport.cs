@@ -1,4 +1,6 @@
-﻿namespace Flight_Reservations
+﻿﻿using System.Collections.Generic;
+
+namespace Flight_Reservations
 {
     public class Airport : Location
     {

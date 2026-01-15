@@ -1,0 +1,5 @@
+[2026-01-15 19:23:58] [INFO] Application Started
+[2026-01-15 19:23:58] [ERROR] Database initialization failed | Exception: SQLite Error 14: 'unable to open database file'.
+[2026-01-15 19:26:31] [INFO] Application Started
+[2026-01-15 19:26:31] [INFO] Database initialized successfully.
+[2026-01-15 19:27:54] [INFO] Booking Confirmed. Flight: 501.0, Passenger: Florin Mitroi, Seat: 1B, Price: 142.5 EUR

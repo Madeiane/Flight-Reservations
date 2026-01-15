@@ -1,4 +1,5 @@
-﻿using Flight_Reservations.Data;
+﻿using System;
+using Flight_Reservations.Data;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -534,13 +535,13 @@ namespace Flight_Reservations
             Flight f = new Flight();
 
             console.Write("Flight Number (e.g., 321): ");
-            if (!decimal.TryParse(console.ReadLine(), out decimal fNum))
+            if (!int.TryParse(console.ReadLine(), out int fNum))
             {
                 console.WriteError("Invalid flight number!");
                 PressKeyToContinue();
                 return;
             }
-            f.FlightNumber = fNum;
+            f.FlightNumber = fNum.ToString();
 
             console.Write("Departure Airport Code (e.g., OTP): ");
             f.DepartureAirportId = console.ReadLine().ToUpper().Trim();
@@ -863,7 +864,7 @@ namespace Flight_Reservations
                 // Flights with crew
                 db.AddFlight(new Flight
                 {
-                    FlightNumber = 321,
+                    FlightNumber = "321",
                     DepartureAirportId = "OTP",
                     ArrivalAirportId = "LHR",
                     DepartureTime = DateTime.Now.AddDays(2).AddHours(10),
@@ -873,7 +874,7 @@ namespace Flight_Reservations
 
                 db.AddFlight(new Flight
                 {
-                    FlightNumber = 322,
+                    FlightNumber = "322",
                     DepartureAirportId = "OTP",
                     ArrivalAirportId = "LHR",
                     DepartureTime = DateTime.Now.AddDays(2).AddHours(18),
@@ -883,7 +884,7 @@ namespace Flight_Reservations
 
                 db.AddFlight(new Flight
                 {
-                    FlightNumber = 401,
+                    FlightNumber = "401",
                     DepartureAirportId = "OTP",
                     ArrivalAirportId = "CDG",
                     DepartureTime = DateTime.Now.AddDays(3).AddHours(8),
@@ -893,7 +894,7 @@ namespace Flight_Reservations
 
                 db.AddFlight(new Flight
                 {
-                    FlightNumber = 501,
+                    FlightNumber = "501",
                     DepartureAirportId = "LHR",
                     ArrivalAirportId = "CDG",
                     DepartureTime = DateTime.Now.AddDays(3).AddHours(14),
@@ -903,10 +904,10 @@ namespace Flight_Reservations
 
                
                 var stewardessIds = new List<int> { db.GetStaffByRole("Stewardess").First(s => s.Name == "Maria Garcia").Id, db.GetStaffByRole("Stewardess").First(s => s.Name == "Emma Wilson").Id };
-                db.AddFlightCrew(321, stewardessIds);
-                db.AddFlightCrew(322, stewardessIds);
-                db.AddFlightCrew(401, stewardessIds);
-                db.AddFlightCrew(501, stewardessIds);
+                db.AddFlightCrew("321", stewardessIds);
+                db.AddFlightCrew("322", stewardessIds);
+                db.AddFlightCrew("401", stewardessIds);
+                db.AddFlightCrew("501", stewardessIds);
 
                 console.WriteSuccess("✓ Sample data loaded successfully!");
             }
