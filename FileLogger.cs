@@ -29,8 +29,9 @@ namespace Flight_Reservations
             }
             catch 
             {
-                // Dacă nu putem scrie în log, nu vrem să crăpe aplicația
+              
             }
         }
     }
+
 }
